@@ -107,6 +107,23 @@ import Testing
 
         #expect(cacheSpy.callCount == 0)
     }
+    
+    @Test func test_load_shouldInvokeCache_onDependencySignaledRevisionChange() async throws {
+        let request = makeRequest()
+        let initialResponse = makeResponse("initial-revision")
+        let updatedResponse = makeResponse("updated-revision")
+        let (sut, _, cacheSpy, shouldCacheSpy) = makeSUT(
+            loadStubs: [.success(initialResponse), .success(updatedResponse)],
+            shouldCacheStubs: [false, true]
+        )
+
+        _ = try await load(sut, request)
+        _ = try await load(sut, request)
+
+        #expect(shouldCacheSpy.payloads.map(\.1) == [initialResponse.revision, updatedResponse.revision])
+        #expect(cacheSpy.payloads.map(\.0) == [request])
+        #expect(cacheSpy.payloads.map(\.1) == [updatedResponse])
+    }
 
     // MARK: - Helpers
 
@@ -125,24 +142,38 @@ import Testing
 
     private func makeSUT(
         loadStub: Result<Response, Error>? = nil,
-        revisionDiffers shouldCacheStub: Bool = true
+        revisionDiffers shouldCacheStub: Bool = true,
+        sourceLocation: SourceLocation = #_sourceLocation
     ) -> (
         sut: SUT,
         loaderSpy: LoaderSpy,
         cacheSpy: CacheSpy,
         shouldCacheSpy: ShouldCacheSpy
     ) {
-        let loaderSpy = LoaderSpy(stubs: [loadStub ?? .success(makeResponse())])
+        return makeSUT(loadStubs: [loadStub ?? .success(makeResponse())], shouldCacheStubs: [shouldCacheStub], sourceLocation: sourceLocation)
+    }
+
+    private func makeSUT(
+        loadStubs: [Result<Response, Error>],
+        shouldCacheStubs: [Bool],
+        sourceLocation: SourceLocation = #_sourceLocation
+    ) -> (
+        sut: SUT,
+        loaderSpy: LoaderSpy,
+        cacheSpy: CacheSpy,
+        shouldCacheSpy: ShouldCacheSpy
+    ) {
+        let loaderSpy = LoaderSpy(stubs: loadStubs)
         let cacheSpy = CacheSpy()
-        let shouldCacheSpy = ShouldCacheSpy(stubs: [shouldCacheStub])
+        let shouldCacheSpy = ShouldCacheSpy(stubs: shouldCacheStubs)
         let sut = SUT(
             loader: { try await loaderSpy.load($0).get() },
             cache: cacheSpy.call,
             shouldCache: shouldCacheSpy.call
         )
-        trackForMemoryLeaks(loaderSpy)
-        trackForMemoryLeaks(cacheSpy)
-        trackForMemoryLeaks(shouldCacheSpy)
+        trackForMemoryLeaks(loaderSpy, sourceLocation: sourceLocation)
+        trackForMemoryLeaks(cacheSpy, sourceLocation: sourceLocation)
+        trackForMemoryLeaks(shouldCacheSpy, sourceLocation: sourceLocation)
         return (sut, loaderSpy, cacheSpy, shouldCacheSpy)
     }
 }

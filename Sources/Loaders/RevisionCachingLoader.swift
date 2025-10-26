@@ -7,11 +7,13 @@
 
 import Foundation
 
-// TODO: FIX DOCS ON DEV COMPLETION
-/// A decorator that adds caching behavior to an underlying loader.
+/// A decorator that adds revision-aware caching behavior to an underlying loader.
 ///
-/// `RevisionCachingLoader` forwards load requests to an underlying loader and caches successful responses.
-/// If the underlying loader fails, the cache is not invoked.
+/// `RevisionCachingLoader` forwards load requests to an underlying loader and conditionally caches
+/// successful responses based on revision comparison. The `shouldCache` closure determines whether
+/// to cache based on the request and response revision, enabling strategies like ETags or version-based caching.
+///
+/// If the underlying loader fails, neither `shouldCache` nor `cache` are invoked.
 public struct RevisionCachingLoader<Request, Response: RevisionProviding> {
     private let loader: Loader
     private let cache: Cache
@@ -39,10 +41,11 @@ public struct RevisionCachingLoader<Request, Response: RevisionProviding> {
 }
 
 extension RevisionCachingLoader: Loading {
-    /// Loads a response for the given request, caching successful results.
+    /// Loads a response for the given request, conditionally caching successful results.
     ///
-    /// Forwards the request to the underlying loader. On success, caches the response
-    /// before returning it. On failure, propagates the error without caching.
+    /// Forwards the request to the underlying loader. On success, consults `shouldCache` with
+    /// the request and response revision. If `shouldCache` returns `true`, caches the response
+    /// before returning it. On failure, propagates the error without consulting `shouldCache` or caching.
     public func load(_ request: Request) async throws -> Response {
         let response = try await loader(request)
         if shouldCache(request, response.revision) {

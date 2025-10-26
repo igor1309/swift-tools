@@ -82,7 +82,8 @@ import Testing
     }
     
     private func makeSUT(
-        loadStub: Result<Response, Error>? = nil
+        loadStub: Result<Response, Error>? = nil,
+        sourceLocation: SourceLocation = #_sourceLocation
     ) -> (
         sut: SUT,
         loaderSpy: LoaderSpy,
@@ -94,8 +95,8 @@ import Testing
             loader: { try await loaderSpy.load($0).get() },
             cache: cacheSpy.call
         )
-        trackForMemoryLeaks(loaderSpy)
-        trackForMemoryLeaks(cacheSpy)
+        trackForMemoryLeaks(loaderSpy, sourceLocation: sourceLocation)
+        trackForMemoryLeaks(cacheSpy, sourceLocation: sourceLocation)
         return (sut, loaderSpy, cacheSpy)
     }
 }
