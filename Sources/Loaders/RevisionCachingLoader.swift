@@ -45,8 +45,9 @@ extension RevisionCachingLoader: Loading {
     /// before returning it. On failure, propagates the error without caching.
     public func load(_ request: Request) async throws -> Response {
         let response = try await loader(request)
-        _ = shouldCache(request, response.revision)
-        cache(request, response)
+        if shouldCache(request, response.revision) {
+            cache(request, response)
+        }
         return response
     }
 }

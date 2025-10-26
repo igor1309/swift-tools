@@ -12,7 +12,6 @@ import Testing
 
 @Suite final class RevisionCachingLoaderTests: AnyLoaderCommonTests {
 
-    // TODO: ADD MISSING COLLABORATORS IF ANY
     @Test func test_init_shouldNotCallCollaborators() async throws {
         let (_, loaderSpy, cacheSpy, shouldCacheSpy) = makeSUT()
 
@@ -80,7 +79,7 @@ import Testing
     @Test func test_load_shouldInvokeCache_whenNoRevisionCached() async throws {
         let request = makeRequest()
         let response = makeResponse()
-        let (sut, _, cacheSpy, _) = makeSUT(loadStub: .success(response))
+        let (sut, _, cacheSpy, _) = makeSUT(loadStub: .success(response), revisionDiffers: true)
 
         _ = try await load(sut, request)
 
@@ -88,9 +87,26 @@ import Testing
         #expect(cacheSpy.payloads.map(\.1) == [response])
     }
 
-    @Test func test_load_shouldInvokeCache_whenRevisionDiffers() async throws {}
+    @Test func test_load_shouldInvokeCache_whenRevisionDiffers() async throws {
+        let request = makeRequest()
+        let response = makeResponse()
+        let (sut, _, cacheSpy, _) = makeSUT(loadStub: .success(response), revisionDiffers: true)
 
-    @Test func test_load_shouldNotInvokeCache_whenRevisionMatches() async throws {}
+        _ = try await load(sut, request)
+
+        #expect(cacheSpy.payloads.map(\.0) == [request])
+        #expect(cacheSpy.payloads.map(\.1) == [response])
+    }
+
+    @Test func test_load_shouldNotInvokeCache_whenRevisionMatches() async throws {
+        let request = makeRequest()
+        let response = makeResponse()
+        let (sut, _, cacheSpy, _) = makeSUT(loadStub: .success(response), revisionDiffers: false)
+
+        _ = try await load(sut, request)
+
+        #expect(cacheSpy.callCount == 0)
+    }
 
     // MARK: - Helpers
 
@@ -109,7 +125,7 @@ import Testing
 
     private func makeSUT(
         loadStub: Result<Response, Error>? = nil,
-        shouldCacheStub: Bool = true
+        revisionDiffers shouldCacheStub: Bool = true
     ) -> (
         sut: SUT,
         loaderSpy: LoaderSpy,
