@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "EEAA7928-62EA-4D8D-8417-182A84C266C1",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testExecutionOrdering" : "random"
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "LoadersTests",
+        "name" : "LoadersTests"
+      }
+    }
+  ],
+  "version" : 1
+}

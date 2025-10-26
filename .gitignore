@@ -1,0 +1,25 @@
+.build/
+
+# Xcode build artifacts
+DerivedData/
+
+# SwiftPM config
+.swiftpm/configuration/registries.json
+
+# Credentials
+.netrc
+
+# --- Xcode & SwiftPM user-specific noise ---
+# Ignore user-specific Xcode UI state
+*.xcuserstate
+**/xcuserdata/
+
+# Keep shared schemes & workspace settings (commit these)
+!**/*.xcodeproj/xcshareddata/**
+!**/*.xcworkspace/xcshareddata/**
+!.swiftpm/xcode/package.xcworkspace/xcshareddata/**
+
+# SwiftPM Xcode cache — ignore only noisy parts
+.swiftpm/xcode/DerivedData/
+.swiftpm/xcode/WorkspaceSettings.xcsettings
+.swiftpm/xcode/xcuserdata/
