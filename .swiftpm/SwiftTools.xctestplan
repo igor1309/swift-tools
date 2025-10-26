@@ -1,0 +1,38 @@
+{
+  "configurations" : [
+    {
+      "id" : "71DFA9F8-7867-4E28-8EA7-696C95FFE282",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testExecutionOrdering" : "random"
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "CommandExecutorTests",
+        "name" : "CommandExecutorTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "StateMachinesTests",
+        "name" : "StateMachinesTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "LoadersTests",
+        "name" : "LoadersTests"
+      }
+    }
+  ],
+  "version" : 1
+}
