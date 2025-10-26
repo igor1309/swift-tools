@@ -14,15 +14,16 @@ import Testing
 
     // TODO: ADD MISSING COLLABORATORS IF ANY
     @Test func test_init_shouldNotCallCollaborators() async throws {
-        let (_, loaderSpy, cacheSpy) = makeSUT()
+        let (_, loaderSpy, cacheSpy, shouldCacheSpy) = makeSUT()
 
         #expect(loaderSpy.callCount == 0)
         #expect(cacheSpy.callCount == 0)
+        #expect(shouldCacheSpy.callCount == 0)
     }
 
     @Test func test_load_shouldForwardRequest() async throws {
         let request = makeRequest()
-        let (sut, loaderSpy, _) = makeSUT()
+        let (sut, loaderSpy, _,_) = makeSUT()
 
         _ = try? await load(sut, request)
 
@@ -32,7 +33,7 @@ import Testing
     @Test func test_load_shouldPropagateError_onUnderlyingLoaderFailure() async throws {
         let request = makeRequest()
         let error = makeFailure()
-        let (sut, _,_) = makeSUT(loadStub: .failure(error))
+        let (sut, _,_,_) = makeSUT(loadStub: .failure(error))
 
         await #expect(throws: Failure.self) {
             _ = try await self.load(sut, request)
@@ -42,7 +43,7 @@ import Testing
     @Test func test_load_shouldReturnResponse_onSuccessfulLoad() async throws {
         let request = makeRequest()
         let expectedResponse = makeResponse()
-        let (sut, _,_) = makeSUT(loadStub: .success(expectedResponse))
+        let (sut, _,_,_) = makeSUT(loadStub: .success(expectedResponse))
 
         let receivedResponse = try await load(sut, request)
 
@@ -50,17 +51,36 @@ import Testing
     }
 
     @Test func test_load_shouldNotInvokeCache_onUnderlyingLoaderFailure() async throws {
-        let (sut, _, cacheSpy) = makeSUT(loadStub: .failure(makeFailure()))
+        let (sut, _, cacheSpy, _) = makeSUT(loadStub: .failure(makeFailure()))
 
         _ = try? await load(sut, makeRequest())
 
         #expect(cacheSpy.callCount == 0)
     }
 
+    @Test func test_load_shouldNotAskShouldCache_onUnderlyingLoaderFailure() async throws {
+        let (sut, _,_, shouldCacheSpy) = makeSUT(loadStub: .failure(makeFailure()))
+
+        _ = try? await load(sut, makeRequest())
+
+        #expect(shouldCacheSpy.callCount == 0)
+    }
+
+    @Test func test_load_shouldAskShouldCacheWithRequestAndRevision_onSuccessfulLoad() async throws {
+        let request = makeRequest()
+        let response = makeResponse()
+        let (sut, _,_, shouldCacheSpy) = makeSUT(loadStub: .success(response))
+
+        _ = try await load(sut, request)
+
+        #expect(shouldCacheSpy.payloads.map(\.0) == [request])
+        #expect(shouldCacheSpy.payloads.map(\.1) == [response.revision])
+    }
+
     @Test func test_load_shouldInvokeCache_whenNoRevisionCached() async throws {
         let request = makeRequest()
         let response = makeResponse()
-        let (sut, _, cacheSpy) = makeSUT(loadStub: .success(response))
+        let (sut, _, cacheSpy, _) = makeSUT(loadStub: .success(response))
 
         _ = try await load(sut, request)
 
@@ -77,6 +97,7 @@ import Testing
     private typealias SUT = RevisionCachingLoader<Request, Response>
     private typealias LoaderSpy = CallSpy<Request, Result<Response, Error>>
     private typealias CacheSpy = CallSpy<(Request, Response), Void>
+    private typealias ShouldCacheSpy = CallSpy<(Request, Response.Revision), Bool>
 
     @discardableResult
     private func load(
@@ -87,20 +108,29 @@ import Testing
     }
 
     private func makeSUT(
-        loadStub: Result<Response, Error>? = nil
+        loadStub: Result<Response, Error>? = nil,
+        shouldCacheStub: Bool = true
     ) -> (
         sut: SUT,
         loaderSpy: LoaderSpy,
-        cacheSpy: CacheSpy
+        cacheSpy: CacheSpy,
+        shouldCacheSpy: ShouldCacheSpy
     ) {
         let loaderSpy = LoaderSpy(stubs: [loadStub ?? .success(makeResponse())])
         let cacheSpy = CacheSpy()
+        let shouldCacheSpy = ShouldCacheSpy(stubs: [shouldCacheStub])
         let sut = SUT(
             loader: { try await loaderSpy.load($0).get() },
-            cache: cacheSpy.call
+            cache: cacheSpy.call,
+            shouldCache: shouldCacheSpy.call
         )
         trackForMemoryLeaks(loaderSpy)
         trackForMemoryLeaks(cacheSpy)
-        return (sut, loaderSpy, cacheSpy)
+        trackForMemoryLeaks(shouldCacheSpy)
+        return (sut, loaderSpy, cacheSpy, shouldCacheSpy)
     }
+}
+
+extension AnyLoaderCommonTests.Response: RevisionProviding {
+    var revision: String { value }
 }
