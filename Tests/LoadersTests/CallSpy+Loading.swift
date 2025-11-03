@@ -14,3 +14,9 @@ extension CallSpy: Loading {
         return response
     }
 }
+
+extension CallSpy {
+    func load<S, E: Error>(_ request: Payload) async throws -> S where Response == Result<S, E> {
+        return try await load(request).get()
+    }
+}

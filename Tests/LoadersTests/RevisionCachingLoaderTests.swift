@@ -167,7 +167,7 @@ import Testing
         let cacheSpy = CacheSpy()
         let shouldCacheSpy = ShouldCacheSpy(stubs: shouldCacheStubs)
         let sut = SUT(
-            loader: { try await loaderSpy.load($0).get() },
+            loader: loaderSpy.load,
             cache: cacheSpy.call,
             shouldCache: shouldCacheSpy.call
         )
