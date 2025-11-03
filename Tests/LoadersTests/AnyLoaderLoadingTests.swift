@@ -64,14 +64,15 @@ import Testing
     // MARK: - Helpers
 
     private func makeSUT(
-        stubs: [Response]? = nil
+        stubs: [Response]? = nil,
+        sourceLocation: SourceLocation = #_sourceLocation
     ) -> (
         sut: SUT,
         spy: LoaderSpy
     ) {
         let spy = LoaderSpy(stubs: stubs ?? [makeResponse()])
         let sut = SUT(spy)
-        trackForMemoryLeaks(spy)
+        trackForMemoryLeaks(spy, sourceLocation: sourceLocation)
         return (sut, spy)
     }
 }
