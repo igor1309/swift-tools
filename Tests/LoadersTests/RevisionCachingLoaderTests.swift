@@ -128,7 +128,7 @@ import Testing
     // MARK: - Helpers
 
     private typealias SUT = RevisionCachingLoader<Request, Response>
-    private typealias LoaderSpy = CallSpy<Request, Result<Response, Error>>
+    private typealias LoaderSpy = AsyncSpy<Request, Result<Response, Error>>
     private typealias CacheSpy = CallSpy<(Request, Response), Void>
     private typealias ShouldCacheSpy = CallSpy<(Request, Response.Revision), Bool>
 
@@ -150,7 +150,11 @@ import Testing
         cacheSpy: CacheSpy,
         shouldCacheSpy: ShouldCacheSpy
     ) {
-        return makeSUT(loadStubs: [loadStub ?? .success(makeResponse())], shouldCacheStubs: [shouldCacheStub], sourceLocation: sourceLocation)
+        return makeSUT(
+            loadStubs: [loadStub ?? .success(makeResponse())],
+            shouldCacheStubs: [shouldCacheStub],
+            sourceLocation: sourceLocation
+        )
     }
 
     private func makeSUT(

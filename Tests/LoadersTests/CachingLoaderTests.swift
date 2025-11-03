@@ -70,7 +70,7 @@ import Testing
     // MARK: - Helpers
     
     private typealias SUT = CachingLoader<Request, Response>
-    private typealias LoaderSpy = CallSpy<Request, Result<Response, Error>>
+    private typealias LoaderSpy = AsyncSpy<Request, Result<Response, Error>>
     private typealias CacheSpy = CallSpy<(Request, Response), Void>
     
     @discardableResult
@@ -92,7 +92,7 @@ import Testing
         let loaderSpy = LoaderSpy(stubs: [loadStub ?? .success(makeResponse())])
         let cacheSpy = CacheSpy()
         let sut = SUT(
-            loader: { try await loaderSpy.load($0).get() },
+            loader: loaderSpy.load,
             cache: cacheSpy.call
         )
         trackForMemoryLeaks(loaderSpy, sourceLocation: sourceLocation)
