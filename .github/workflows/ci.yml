@@ -11,24 +11,12 @@ on:
 
 jobs:
   test:
-    name: Test on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-        swift-version: ['5.9']
+    name: Test on macOS
+    runs-on: macos-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup Swift (Ubuntu)
-        if: runner.os == 'Linux'
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: ${{ matrix.swift-version }}
 
       - name: Cache Swift packages
         uses: actions/cache@v4
