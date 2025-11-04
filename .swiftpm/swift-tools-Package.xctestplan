@@ -1,0 +1,31 @@
+{
+  "configurations" : [
+    {
+      "id" : "003AF11A-9672-414C-B0B3-3D6046CAA470",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testExecutionOrdering" : "random"
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "LoadersTests",
+        "name" : "LoadersTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "StoresTests",
+        "name" : "StoresTests"
+      }
+    }
+  ],
+  "version" : 1
+}
