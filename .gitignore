@@ -1,4 +1,5 @@
-.build/
+# build artifacts
+.build
 
 # Xcode build artifacts
 DerivedData/
