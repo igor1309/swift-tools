@@ -7,6 +7,7 @@ let package = Package(
     name: .packageName,
     products: [
         .loaders,
+        .stores,
     ],
     dependencies: [
         // .combineSchedulers,
@@ -16,6 +17,8 @@ let package = Package(
     targets: [
         .loaders,
         .loadersTests,
+        .stores,
+        .storesTests,
     ]
 )
 
@@ -25,6 +28,13 @@ private extension Product {
         name: .loaders,
         targets: [
             .loaders,
+        ]
+    )
+    
+    static let stores: Product = .library(
+        name: .stores,
+        targets: [
+            .stores,
         ]
     )
 }
@@ -43,11 +53,25 @@ private extension Target {
             .loaders,
         ]
     )
+    
+    static let stores: Target = .target(
+        name: .stores,
+        dependencies: []
+    )
+
+    static let storesTests: Target = .testTarget(
+        name: .storesTests,
+        dependencies: [
+            .customDump,
+            .stores,
+        ]
+    )
 }
 
 private extension Target.Dependency {
 
     static let loaders: Self = .target(name: .loaders)
+    static let stores: Self = .target(name: .stores)
 }
 
 private extension String {
@@ -58,6 +82,9 @@ private extension String {
     
     static let loaders = "Loaders"
     static let loadersTests = "LoadersTests"
+    
+    static let stores = "Stores"
+    static let storesTests = "StoresTests"
 }
 
 // MARK: - Point-Free
