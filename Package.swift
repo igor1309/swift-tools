@@ -5,6 +5,10 @@ import PackageDescription
 
 let package = Package(
     name: .packageName,
+    platforms: [
+        .macOS(.v11),
+        .iOS(.v16)
+    ],
     products: [
         .loaders,
         .stores,
@@ -45,7 +49,7 @@ private extension Target {
         name: .loaders,
         dependencies: []
     )
-
+    
     static let loadersTests: Target = .testTarget(
         name: .loadersTests,
         dependencies: [
@@ -58,7 +62,7 @@ private extension Target {
         name: .stores,
         dependencies: []
     )
-
+    
     static let storesTests: Target = .testTarget(
         name: .storesTests,
         dependencies: [
@@ -69,7 +73,7 @@ private extension Target {
 }
 
 private extension Target.Dependency {
-
+    
     static let loaders: Self = .target(name: .loaders)
     static let stores: Self = .target(name: .stores)
 }

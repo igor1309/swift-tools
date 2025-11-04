@@ -22,6 +22,8 @@ final class DiskDataStoreTests: XCTestCase {
         undoStoreSideEffects()
     }
     
+    // MARK: - init
+    
     func test_init_shouldThrowOnInvalidURL() throws {
         
         let invalidURL = URL(string: "invalid://store-url")!
@@ -77,6 +79,8 @@ final class DiskDataStoreTests: XCTestCase {
         XCTAssertNotNil(sut)
     }
     
+    // MARK: - insert
+    
     func test_insert_shouldCallKeyMapperWithKey() throws {
         
         let (key, data) = makeKeyWithData()
@@ -115,6 +119,8 @@ final class DiskDataStoreTests: XCTestCase {
         expect(sut2, with: anyMessage(), toRetrieve: .success(data))
     }
     
+    // MARK: - retrieve
+    
     func test_retrieve_shouldCallKeyMapperWithKey() throws {
         
         let key = anyMessage()
@@ -149,6 +155,33 @@ final class DiskDataStoreTests: XCTestCase {
         
         expect(sut, with: key, toRetrieve: .success(data))
     }
+    
+    func test_retrieve_shouldDeliverFailureAsynchronously_onEmptyCache() throws {
+        
+        let (sut, _) = try makeSUT()
+        let exp = expectation(description: "Wait for async failure")
+        var observedResult: Result<Data, Error>?
+        var completionInvokedSynchronously = false
+        
+        sut.retrieve(key: anyMessage()) { result in
+            
+            observedResult = result
+            completionInvokedSynchronously = true
+            exp.fulfill()
+        }
+        
+        XCTAssertFalse(completionInvokedSynchronously)
+        wait(for: [exp], timeout: 1.0)
+        
+        switch observedResult {
+        case let .failure(error as SUT.RetrievalFailure)?:
+            XCTAssertEqual(error, SUT.RetrievalFailure())
+        default:
+            XCTFail("Expected asynchronous failure, got \(String(describing: observedResult)) instead.")
+        }
+    }
+    
+    // MARK: - delete
     
     func test_delete_shouldNotDeliverErrorOnEmptyCacheDeletion() throws {
         
@@ -198,6 +231,8 @@ final class DiskDataStoreTests: XCTestCase {
         ))
     }
     
+    // MARK: - other
+    
     func test_storeSideEffects_shouldRunSerially() throws {
         
         let (key1, key3) = (anyMessage(), anyMessage())
@@ -229,31 +264,6 @@ final class DiskDataStoreTests: XCTestCase {
         waitForExpectations(timeout: 5.0)
         
         XCTAssertEqual(operations, [op1, op2, op3])
-    }
-    
-    func test_retrieve_shouldDeliverFailureAsynchronously_onEmptyCache() throws {
-        
-        let (sut, _) = try makeSUT()
-        let exp = expectation(description: "Wait for async failure")
-        var observedResult: Result<Data, Error>?
-        var completionInvokedSynchronously = false
-        
-        sut.retrieve(key: anyMessage()) { result in
-            
-            observedResult = result
-            completionInvokedSynchronously = true
-            exp.fulfill()
-        }
-        
-        XCTAssertFalse(completionInvokedSynchronously)
-        wait(for: [exp], timeout: 1.0)
-        
-        switch observedResult {
-        case let .failure(error as SUT.RetrievalFailure)?:
-            XCTAssertEqual(error, SUT.RetrievalFailure())
-        default:
-            XCTFail("Expected asynchronous failure, got \(String(describing: observedResult)) instead.")
-        }
     }
     
     // MARK: - Helpers
@@ -356,10 +366,10 @@ final class DiskDataStoreTests: XCTestCase {
             
             switch (expectedResult, retrievedResult) {
             case let (.success(expected), .success(retrieve)):
-                XCTAssertEqual(expected, retrieve, "Expected \(expected), got \(retrieve) instead.", file: file, line: line)
+                XCTAssertNoDiff(expected, retrieve, "Expected \(expected), got \(retrieve) instead.", file: file, line: line)
                 
             case let (.failure(expected as NSError?), .failure(retrieved as NSError?)):
-                XCTAssertEqual(expected, retrieved, file: file, line: line)
+                XCTAssertNoDiff(expected, retrieved, file: file, line: line)
                 
             default:
                 XCTFail("Expected retrieving \(expectedResult), got \(retrievedResult) instead.", file: file, line: line)
