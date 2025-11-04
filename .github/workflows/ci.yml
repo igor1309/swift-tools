@@ -27,10 +27,10 @@ jobs:
             ${{ runner.os }}-spm-
 
       - name: Build
-        run: swift build --verbose
+        run: swift build
 
       - name: Run tests
-        run: swift test --verbose
+        run: swift test
 
       - name: Build for release
         run: swift build -c release
