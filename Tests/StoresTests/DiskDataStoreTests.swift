@@ -366,10 +366,10 @@ final class DiskDataStoreTests: XCTestCase {
             
             switch (expectedResult, retrievedResult) {
             case let (.success(expected), .success(retrieve)):
-                XCTAssertEqual(expected, retrieve, "Expected \(expected), got \(retrieve) instead.", file: file, line: line)
+                XCTAssertNoDiff(expected, retrieve, "Expected \(expected), got \(retrieve) instead.", file: file, line: line)
                 
             case let (.failure(expected as NSError?), .failure(retrieved as NSError?)):
-                XCTAssertEqual(expected, retrieved, file: file, line: line)
+                XCTAssertNoDiff(expected, retrieved, file: file, line: line)
                 
             default:
                 XCTFail("Expected retrieving \(expectedResult), got \(retrievedResult) instead.", file: file, line: line)
