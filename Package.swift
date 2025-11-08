@@ -5,6 +5,10 @@ import PackageDescription
 
 let package = Package(
     name: .packageName,
+    platforms: [
+        .macOS(.v13),
+        .iOS(.v16)
+    ],
     products: [
         .loaders,
         .stores,
