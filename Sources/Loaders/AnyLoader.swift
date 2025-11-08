@@ -15,9 +15,9 @@ public struct AnyLoader<Request, Response> {
     }
 }
 
-public extension AnyLoader {
+extension AnyLoader: Loading {
     /// Loads a `Response` for the given `Request` by forwarding to the wrapped loader.
-    func load(_ request: Request) async throws -> Response {
+    public func load(_ request: Request) async throws -> Response {
         try await loader(request)
     }
 }
