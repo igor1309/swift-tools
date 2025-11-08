@@ -70,7 +70,7 @@ import Testing
     // MARK: - Helpers
     
     private typealias SUT = CachingLoader<Request, Response>
-    private typealias LoaderSpy = AsyncSpy<Request, Result<Response, Error>>
+    private typealias LoaderSpy = AsyncSpy<Request, Response, Error>
     private typealias CacheSpy = CallSpy<(Request, Response), Void>
     
     @discardableResult

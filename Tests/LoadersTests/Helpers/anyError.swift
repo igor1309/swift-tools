@@ -11,3 +11,8 @@ func anyError(_ domain: String = "any error") -> Error {
     
     NSError(domain: domain, code: -1)
 }
+
+func anyNSError(_ domain: String = "any error") -> NSError {
+    
+    NSError(domain: domain, code: -1)
+}

@@ -5,16 +5,20 @@
 //  Created by Igor Malyarov on 03.11.2025.
 //
 
-final class AsyncSpy<Payload, Response> {
+final class AsyncSpy<Payload, Response, Failure: Error> {
     
     private(set) var payloads = [Payload]()
-    private var stubs: [Response]
+    private var stubs: [Stub]
     
-    init(stubs: [Response] = []) {
+    init(stubs: [Stub] = []) {
         
         self.stubs = stubs
     }
+    
+    typealias Stub = Result<Response, Failure>
 }
+
+typealias AsyncSpyOf<Payload, Response> = AsyncSpy<Payload, Response, Error>
 
 extension AsyncSpy {
     
@@ -22,9 +26,9 @@ extension AsyncSpy {
     
     func call(payload: Payload) async throws -> Response {
         
-        try await Task.sleep(for: .milliseconds(100))
+        try? await Task.sleep(for: .milliseconds(100))
         payloads.append(payload)
-        return stubs.removeFirst()
+        return try stubs.removeFirst().get()
     }
 }
 
@@ -40,7 +44,7 @@ extension AsyncSpy where Response == Void {
     
     convenience init() {
         
-        self.init(stubs: [()])
+        self.init(stubs: [.success(())])
     }
 }
 

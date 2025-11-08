@@ -11,7 +11,7 @@ import Testing
 @Suite class AnyLoaderCommonTests: TestContext {
     
     typealias SUT = AnyLoader<Request, Response>
-    typealias LoaderSpy = AsyncSpy<Request, Response>
+    typealias LoaderSpy = AsyncSpyOf<Request, Response>
     
     @discardableResult
     func load(
