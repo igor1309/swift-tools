@@ -38,7 +38,7 @@ import Testing
     @Test func test_load_shouldReturnResponse_whenLoaderSucceeds() async throws {
         let request = makeRequest()
         let expectedResponse = makeResponse()
-        let (sut, _) = makeSUT(stubs: [expectedResponse])
+        let (sut, _) = makeSUT(stubs: [.success(expectedResponse)])
         
         let receivedResponse = try await load(sut, request)
         
@@ -52,8 +52,8 @@ import Testing
             makeResponse("first-response"),
             makeResponse("second-response")
         ]
-        let (sut, spy) = makeSUT(stubs: expectedResponses)
-        
+        let (sut, spy) = makeSUT(stubs: expectedResponses.map(Result<Response, Error>.success))
+
         let firstResponse = try await load(sut, firstRequest)
         let secondResponse = try await load(sut, secondRequest)
         
@@ -64,13 +64,13 @@ import Testing
     // MARK: - Helpers
 
     private func makeSUT(
-        stubs: [Response]? = nil,
+        stubs: [Result<Response, Error>]? = nil,
         sourceLocation: SourceLocation = #_sourceLocation
     ) -> (
         sut: SUT,
         spy: LoaderSpy
     ) {
-        let spy = LoaderSpy(stubs: stubs ?? [makeResponse()])
+        let spy = LoaderSpy(stubs: stubs ?? [.success(makeResponse())])
         let sut = SUT(spy)
         trackForMemoryLeaks(spy, sourceLocation: sourceLocation)
         return (sut, spy)
