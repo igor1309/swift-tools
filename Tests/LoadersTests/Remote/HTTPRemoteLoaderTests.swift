@@ -140,10 +140,3 @@ final class HTTPRemoteLoaderTests: TestContext {
         return .init(string: "https://example.com/\(UUID().uuidString)")!
     }
 }
-
-extension AsyncSpy: HTTPClient where Payload == URLRequest, Response == (Data, HTTPURLResponse) {
-    
-    func get(with request: URLRequest) async throws -> (Data, HTTPURLResponse) {
-        try await call(payload: request)
-    }
-}

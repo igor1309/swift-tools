@@ -24,7 +24,7 @@ public final class HTTPRemoteLoader<T> {
 
 extension HTTPRemoteLoader: Loading {
     public func load(_ request: URLRequest) async throws -> T {
-        let response = try await httpClient.get(with: request)
+        let response = try await httpClient.load(request)
         return try process(response)
     }
 }

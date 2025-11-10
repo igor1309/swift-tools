@@ -15,8 +15,14 @@ public final class URLSessionHTTPClient {
     }
 }
 
-extension URLSessionHTTPClient: HTTPClient {
-    public func get(with request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+extension URLSessionHTTPClient: Loading {
+    public func load(_ request: URLRequest) async throws -> (Data, HTTPURLResponse) {
+        try await get(with: request)
+    }
+}
+
+public extension URLSessionHTTPClient {
+    func get(with request: URLRequest) async throws -> (Data, HTTPURLResponse) {
         let (data, response) = try await session.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse else {
             throw Error.invalidResponse
@@ -24,7 +30,7 @@ extension URLSessionHTTPClient: HTTPClient {
         return (data, httpResponse)
     }
     
-    public enum Error: Swift.Error, Equatable {
+    enum Error: Swift.Error, Equatable {
         case invalidResponse
     }
 }
