@@ -47,7 +47,8 @@ private extension Target {
     
     static let loaders: Target = .target(
         name: .loaders,
-        dependencies: []
+        dependencies: [],
+        exclude: ["Remote/HTTPResponseDecoder/README.md"]
     )
 
     static let loadersTests: Target = .testTarget(
