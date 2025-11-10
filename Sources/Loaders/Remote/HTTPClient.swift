@@ -7,7 +7,4 @@
 
 import Foundation
 
-public protocol HTTPClient {
-    
-    func get(with request: URLRequest) async throws -> (Data, HTTPURLResponse)
-}
+public typealias HTTPClient = Loading<URLRequest, (Data, HTTPURLResponse)>
