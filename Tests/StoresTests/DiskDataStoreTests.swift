@@ -256,6 +256,48 @@ final class DiskDataStoreTests: XCTestCase {
         }
     }
     
+    // MARK: - Store Conformance Tests
+    
+    func test_asyncInsert_shouldStoreData() async throws {
+        
+        let (key, data) = makeKeyWithData()
+        let (sut, _) = try makeSUT()
+        let store: any Store = sut
+        
+        try await store.insert(data, forKey: key)
+        
+        let retrieved = try await store.retrieve(key: key)
+        XCTAssertEqual(retrieved, data)
+    }
+    
+    func test_asyncRetrieve_shouldThrowOnEmptyCache() async throws {
+        
+        let (sut, _) = try makeSUT()
+        let store: any Store = sut
+        
+        do {
+            _ = try await store.retrieve(key: anyMessage())
+            XCTFail("Expected retrieve to throw")
+        } catch {
+            XCTAssertTrue(error is SUT.RetrievalFailure)
+        }
+    }
+    
+    func test_asyncInsert_shouldOverridePreviousData() async throws {
+        
+        let (key, firstData, secondData) = (anyMessage(), anyData(), anyData())
+        let (sut, _) = try makeSUT()
+        let store: any Store = sut
+        
+        try await store.insert(firstData, forKey: key)
+        let firstRetrieved = try await store.retrieve(key: key)
+        XCTAssertEqual(firstRetrieved, firstData)
+        
+        try await store.insert(secondData, forKey: key)
+        let secondRetrieved = try await store.retrieve(key: key)
+        XCTAssertEqual(secondRetrieved, secondData)
+    }
+    
     // MARK: - Helpers
     
     private typealias SUT = DiskDataStore
