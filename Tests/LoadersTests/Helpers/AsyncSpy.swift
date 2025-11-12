@@ -76,3 +76,15 @@ extension AsyncSpy where Response == Result<Void, Error> {
         return try await self.call(payload: (a, b))
     }
 }
+
+extension AsyncSpy where Failure == Never, Response == Void {
+    
+    func callNoThrow(payload: Payload) async {
+        try! await self.call(payload: payload)
+    }
+    
+    func callNoThrow<A, B>(_ a: A, _ b: B) async
+    where Payload == (A, B) {
+        await callNoThrow(payload: (a, b))
+    }
+}
