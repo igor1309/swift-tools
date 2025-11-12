@@ -20,7 +20,7 @@ public struct CachingLoader<Request, Response> {
     ///
     /// - Parameters:
     ///   - loading: The underlying loader abstraction to forward requests to.
-    ///   - cache: The cache that stores successful responses.
+    ///   - cache: The async cache that stores successful responses.
     public init(
         loading: any Loading,
         cache: @escaping Cache
@@ -30,7 +30,7 @@ public struct CachingLoader<Request, Response> {
     }
 
     public typealias Loading = Loaders.Loading<Request, Response>
-    public typealias Cache = (Request, Response) -> Void
+    public typealias Cache = (Request, Response) async -> Void
 }
 
 extension CachingLoader {
@@ -39,7 +39,7 @@ extension CachingLoader {
     ///
     /// - Parameters:
     ///   - loader: The closure that produces responses for incoming requests.
-    ///   - cache: The cache that stores successful responses.
+    ///   - cache: The async cache that stores successful responses.
     public init(
         loader: @escaping Loader,
         cache: @escaping Cache
@@ -57,7 +57,7 @@ extension CachingLoader: Loading {
     /// before returning it. On failure, propagates the error without caching.
     public func load(_ request: Request) async throws -> Response {
         let response = try await loading.load(request)
-        cache(request, response)
+        await cache(request, response)
         return response
     }
 }

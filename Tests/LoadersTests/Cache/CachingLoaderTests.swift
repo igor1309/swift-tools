@@ -71,7 +71,7 @@ import Testing
     
     private typealias SUT = CachingLoader<Request, Response>
     private typealias LoaderSpy = AsyncSpy<Request, Response, Error>
-    private typealias CacheSpy = CallSpy<(Request, Response), Void>
+    private typealias CacheSpy = AsyncSpy<(Request, Response), Void, Never>
     
     @discardableResult
     private func load(
@@ -90,10 +90,10 @@ import Testing
         cacheSpy: CacheSpy
     ) {
         let loaderSpy = LoaderSpy(stubs: [loadStub ?? .success(makeResponse())])
-        let cacheSpy = CacheSpy()
+        let cacheSpy = CacheSpy(stubs: [.success(())])
         let sut = SUT(
             loader: loaderSpy.load,
-            cache: cacheSpy.call
+            cache: cacheSpy.callNoThrow
         )
         trackForMemoryLeaks(loaderSpy, sourceLocation: sourceLocation)
         trackForMemoryLeaks(cacheSpy, sourceLocation: sourceLocation)

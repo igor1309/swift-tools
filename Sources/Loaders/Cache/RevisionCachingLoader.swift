@@ -23,7 +23,7 @@ public struct RevisionCachingLoader<Request, Response: RevisionProviding> {
     ///
     /// - Parameters:
     ///   - loading: The underlying loader abstraction to forward requests to.
-    ///   - cache: The cache that stores successful responses.
+    ///   - cache: The async cache that stores successful responses.
     ///   - shouldCache: Decides whether to cache based on the request and response revision.
     public init(
         loading: any Loading,
@@ -36,7 +36,7 @@ public struct RevisionCachingLoader<Request, Response: RevisionProviding> {
     }
     
     public typealias Loading = Loaders.Loading<Request, Response>
-    public typealias Cache = (Request, Response) -> Void
+    public typealias Cache = (Request, Response) async -> Void
     public typealias ShouldCache = (Request, Response.Revision) -> Bool
 }
 
@@ -45,7 +45,7 @@ extension RevisionCachingLoader {
     ///
     /// - Parameters:
     ///   - loader: The closure that produces responses for incoming requests.
-    ///   - cache: The cache that stores successful responses.
+    ///   - cache: The async cache that stores successful responses.
     ///   - shouldCache: Decides whether to cache based on the request and response revision.
     public init(
         loader: @escaping Loader,
@@ -67,7 +67,7 @@ extension RevisionCachingLoader: Loading {
     public func load(_ request: Request) async throws -> Response {
         let response = try await loading.load(request)
         if shouldCache(request, response.revision) {
-            cache(request, response)
+            await cache(request, response)
         }
         return response
     }

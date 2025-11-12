@@ -129,7 +129,7 @@ import Testing
 
     private typealias SUT = RevisionCachingLoader<Request, Response>
     private typealias LoaderSpy = AsyncSpy<Request, Response, Error>
-    private typealias CacheSpy = CallSpy<(Request, Response), Void>
+    private typealias CacheSpy = AsyncSpy<(Request, Response), Void, Never>
     private typealias ShouldCacheSpy = CallSpy<(Request, Response.Revision), Bool>
 
     @discardableResult
@@ -168,11 +168,11 @@ import Testing
         shouldCacheSpy: ShouldCacheSpy
     ) {
         let loaderSpy = LoaderSpy(stubs: loadStubs)
-        let cacheSpy = CacheSpy()
+        let cacheSpy = CacheSpy(stubs: [.success(()), .success(())])
         let shouldCacheSpy = ShouldCacheSpy(stubs: shouldCacheStubs)
         let sut = SUT(
             loader: loaderSpy.load,
-            cache: cacheSpy.call,
+            cache: cacheSpy.callNoThrow,
             shouldCache: shouldCacheSpy.call
         )
         trackForMemoryLeaks(loaderSpy, sourceLocation: sourceLocation)
