@@ -17,8 +17,27 @@ public final class HTTPResponseDecoder {
 }
 
 public extension HTTPResponseDecoder {
+    enum Error: Swift.Error {
+        /// Server returned a 4xx status code other than 401, 403, or 404.
+        case clientError
+        /// Server returned 403 Forbidden.
+        case forbidden
+        /// Response body could not be decoded as the expected type.
+        case invalidData
+        /// Server returned 404 Not Found.
+        case notFound
+        /// Server returned a 5xx status code.
+        case serverError
+        /// Server returned 401 Unauthorized.
+        case unauthorized
+        /// Server returned a status code not explicitly handled by this decoder.
+        case unexpectedStatusCode
+    }
+}
+
+extension HTTPResponseDecoder: HTTPRevisionedResponseDecoding {
     /// Transforms raw response data and metadata into a typed `DecodedResponse`, throwing when the HTTP status code indicates an error.
-    func processRevisioned<T: Decodable>(_ data: Data, _ response: HTTPURLResponse) throws -> DecodedResponse<T> {
+    public func processRevisioned<T: Decodable>(_ data: Data, _ response: HTTPURLResponse) throws -> DecodedResponse<T> {
         switch response.statusCode {
         case .notFoundStatusCode:
             throw Error.notFound
@@ -38,9 +57,11 @@ public extension HTTPResponseDecoder {
             throw Error.unexpectedStatusCode
         }
     }
-    
+}
+
+extension HTTPResponseDecoder: HTTPResponseDecoding {
     /// Decodes HTTP response data into a typed value, throwing when the HTTP status code indicates an error. Does not support 304 (not modified) responses.
-    func process<T: Decodable>(_ data: Data, _ response: HTTPURLResponse) throws -> T {
+    public func process<T: Decodable>(_ data: Data, _ response: HTTPURLResponse) throws -> T {
         switch response.statusCode {
         case .notFoundStatusCode:
             throw Error.notFound
@@ -57,23 +78,6 @@ public extension HTTPResponseDecoder {
         default:
             throw Error.unexpectedStatusCode
         }
-    }
-    
-    enum Error: Swift.Error {
-        /// Server returned a 4xx status code other than 401, 403, or 404.
-        case clientError
-        /// Server returned 403 Forbidden.
-        case forbidden
-        /// Response body could not be decoded as the expected type.
-        case invalidData
-        /// Server returned 404 Not Found.
-        case notFound
-        /// Server returned a 5xx status code.
-        case serverError
-        /// Server returned 401 Unauthorized.
-        case unauthorized
-        /// Server returned a status code not explicitly handled by this decoder.
-        case unexpectedStatusCode
     }
 }
 
