@@ -1,6 +1,6 @@
 //
 //  HTTPClient.swift
-//  WriterAssistant
+//  swift-tools
 //
 //  Created by Igor Malyarov on 08.11.2025.
 //
