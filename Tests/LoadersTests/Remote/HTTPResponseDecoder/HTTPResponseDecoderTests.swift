@@ -85,17 +85,6 @@ final class HTTPResponseDecoderTests: ResponseDecoderTests {
         #expect(response == expectedValue, sourceLocation: sourceLocation)
     }
 
-    private func expectProcessToResponse(
-        _ expectedResponse: Response,
-        data: Data,
-        statusCode: Int,
-        sourceLocation: SourceLocation = #_sourceLocation
-    ) throws {
-        let httpResponse = makeHTTPURLResponse(statusCode: statusCode)
-        let response = try process(data: data, response: httpResponse)
-        #expect(response == expectedResponse, sourceLocation: sourceLocation)
-    }
-
     private func expectProcessToThrow(
         _ error: SUT.Error,
         data: Data = .emptyData,
