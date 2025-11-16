@@ -1,6 +1,6 @@
 //
 //  RevisionedHTTPRequestBuilderTests.swift
-//  WriterAssistantTests
+//  swift-toolsTests
 //
 //  Created by Igor Malyarov on 08.11.2025.
 //
