@@ -9,6 +9,7 @@ import Foundation
 import Loaders
 import Testing
 
+@MainActor
 final class URLSessionHTTPClientTests: TestContext {
     
     @Test func test_get_shouldPerformRequestWithProvidedRequest() async throws {
